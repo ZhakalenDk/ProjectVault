@@ -37,7 +37,7 @@ namespace Oiski.School.ProjectVault.App
         {
             Console.Clear();
             Console.ResetColor();
-            Console.WriteLine($"Welcome to Oiski's En-Decrypter ({username ?? string.Empty})\n");   //  Title
+            Console.WriteLine($"Welcome to Oiski's En-Decrypter {((username != null) ? ($"({username})") : (string.Empty))}\n");   //  Title
         }
     }
 }

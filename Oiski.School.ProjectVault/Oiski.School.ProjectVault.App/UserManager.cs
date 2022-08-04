@@ -79,7 +79,7 @@ namespace Oiski.School.ProjectVault.App
             {
                 var userData = _userStore.FindLine(username.ToLower())?.Split(",");
 
-                var key = ((userData.Length > 1) ? (userData[2]) : (null));
+                var key = ((userData.Length > 2) ? (userData[2]) : (null));
 
                 return key;
             }

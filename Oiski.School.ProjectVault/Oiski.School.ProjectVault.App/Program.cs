@@ -1,52 +1,65 @@
 ﻿using Oiski.School.ProjectVault.App;
-//  This program uses 'goto' statements because I thought it would be fun to try and it keeps the source-code shorter
+using System.IO;
 
-start:  //  The beginning of the program (This is a reset point)
+const string SLASH_PLACEHOLDER = "!_^_!";
 
+//  This program uses 'goto' statements because I thought it would be fun to try and it keeps the source-code shorter (Slightly more confusing as well...)
+
+program_Start:  //  The beginning of the program (This is a reset point)
+
+#region INITIAL SIGN IN PROMPT
 ConsoleHelper.BuildBaseLayout();
 
 Console.WriteLine("Sign in to decrypt file");
 string username = ConsoleHelper.GetStringInput("Username").ToLower();
 string password = ConsoleHelper.GetStringInput("Passsword", hideInput: true);
 Console.WriteLine();
+#endregion
 
+#region CREATE NEW USER
 if (username.StartsWith("new "))
 {
     if (UserManager.StoreUser(username.Replace("new ", string.Empty), password))
     {
         Console.WriteLine("User Successfully stored!");
         Thread.Sleep(2000);
-        goto start; //  Resets the menu
+        goto program_Start; //  Resets the menu
     }
 
     Console.ForegroundColor = ConsoleColor.Red;
     Console.WriteLine("User already exists!");
     Thread.Sleep(2000);
     Console.ResetColor();
-    goto start; //  Resets the menu
+    goto program_Start; //  Resets the menu
 }
+#endregion
 
+#region SIGN IN
 if (!UserManager.SignInUser(username, password))
 {
     Console.ForegroundColor = ConsoleColor.Red;
     Console.WriteLine("Password or username is incorrect!");
     Thread.Sleep(2000);
-    goto start; //  Reset the menu
+    goto program_Start; //  Reset the menu
 }
+#endregion
 
-choiceMenu: //  Marks the beginning of the choice menu (This is a reset point)
+#region CHOICE MENU
+choice_Menu: //  Marks the beginning of the choice menu (This is a reset point)
 string choice;
 
 do
 {
-    ConsoleHelper.BuildBaseLayout();
+    ConsoleHelper.BuildBaseLayout(username);
     Console.WriteLine("What do you wanna do?");
     choice = ConsoleHelper.GetStringInput("[E] Encrypt | [D] Decrypt | [S] Switch Account").ToLower();
 
 } while (string.IsNullOrWhiteSpace(choice) && (choice != "e" || choice != "d"));
 
-if (choice == "s") { goto start; /* Resetting menu */ }
+if (choice == "s") { goto program_Start; /* Resetting menu */ }
+#endregion
 
+#region FILE FETCH
 string fileData = null;
 string filePath;
 string fileName;
@@ -54,9 +67,10 @@ string fileName;
 do
 {
     ConsoleHelper.BuildBaseLayout(username);
-    Console.WriteLine($"{((choice == "E") ? ("Encrypt") : ("Decrypt"))} File");
+    Console.WriteLine($"{((choice == "e") ? ("Encrypt") : ("Decrypt"))} File");
     filePath = ConsoleHelper.GetStringInput("File Path");
-    fileName = ConsoleHelper.GetStringInput("File Name");
+    fileName = ConsoleHelper.GetStringInput($"File Name {((choice == "e") ? (string.Empty) : ("(Without hash)"))}");
+
     Console.WriteLine();
 
     if (!string.IsNullOrWhiteSpace(filePath))
@@ -80,54 +94,64 @@ do
     }
 
 } while (fileData == null);
+#endregion
 
+#region ENCRYPT
 if (choice == "e")
 {
     var crypto = new OiskiCipher();
 
     crypto.GenerateKeys();
+    var hashPass = OiskiHasher.HashPassword(password, username).Replace("/", SLASH_PLACEHOLDER);
+    string fullPath = $"{filePath}/{hashPass}_{fileName}";
 
-    var handler = new FileHandler(filePath, $"Encrypted_{fileName}");
-    //handler.WriteLine(OiskiHasher.HashPassword(password, username));
-    handler.Write(crypto.Encrypt(fileData), append: true);
+    File.WriteAllBytes(fullPath, crypto.Encrypt(fileData));
     UserManager.StoreKey(username, password, crypto.GetPrivateKeyAsXml());
 
     Console.Write("File Encrypted and stored at: ");
     Console.ForegroundColor = ConsoleColor.Cyan;
-    Console.Write(handler.FilePath);
+    Console.Write(fullPath);
     Console.ResetColor();
+    Thread.Sleep(2000);
+
+    goto choice_Menu;   //  Reset menu
 }
+#endregion
+#region DECRYPT
 else if (choice == "d")
 {
     string keys = UserManager.RetrieveKeys(username, password);
 
-    var cipherHandler = new FileHandler(filePath, fileName);
+    var hashedPass = OiskiHasher.HashPassword(password, username).Replace("/", SLASH_PLACEHOLDER);
 
-    var filePassword = cipherHandler.ReadLines()[0];
-    var hashedPass = OiskiHasher.HashPassword(password, username);
+    var path = $"{filePath}/{hashedPass}_{fileName}";
 
-    //if (keys != null && filePassword == hashedPass)
-    //{
-    var crypto = new OiskiCipher(keys);
+    if (keys != null && File.Exists(path))
+    {
+        var crypto = new OiskiCipher(keys);
 
-    var ciphertext = cipherHandler.ReadAll().Replace($"{hashedPass}{Environment.NewLine}", string.Empty);
+        byte[] ciphertext = File.ReadAllBytes($"{filePath}/{hashedPass}_{fileName}");
 
-    var plaintext = crypto.Decrypt(ciphertext);
+        var plaintext = crypto.Decrypt(ciphertext);
 
-    var plaintextHandler = new FileHandler(filePath, $"Encrypted_{fileName}");
-    plaintextHandler.WriteLine(plaintext);
+        var plaintextHandler = new FileHandler(filePath, $"Decrypted_{fileName}");
+        plaintextHandler.WriteLine(plaintext);
 
-    Console.Write("File Decrypted and stored at: ");
-    Console.ForegroundColor = ConsoleColor.Cyan;
-    Console.Write(plaintextHandler.FilePath);
-    Console.ResetColor();
-    //}
+        Console.Write("File Decrypted and stored at: ");
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.Write(plaintextHandler.FilePath);
+        Console.ResetColor();
+        Thread.Sleep(3000);
+
+        goto choice_Menu;    //  Reset Menu
+    }
 
     Console.ForegroundColor = ConsoleColor.Red;
     Console.WriteLine("[!Access Denied!]");
-    Thread.Sleep(2000);
+    Thread.Sleep(3000);
 
-    goto choiceMenu;    //  Reset menu
+    goto choice_Menu;    //  Reset menu
 }
+#endregion
 
 Console.Read();

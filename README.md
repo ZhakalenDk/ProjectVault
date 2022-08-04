@@ -20,6 +20,9 @@ as the original, however, the encrypted file is called `Encrypted_[filename]`.
 
 The password is saved with the file and as such only the user that encrypted the file
 will be able to decrypt it.
+This is of course only the idea. In reality the method used to accomplish this
+in the program is fairly simple and probably easy to crack, however, for the purpose of
+the demenstration this serves it's purpose quite well.
 
 Only one file can be encrypted by a user at a time, if another is ecnrypted the stored
 `Private key` for that user is overwritten.

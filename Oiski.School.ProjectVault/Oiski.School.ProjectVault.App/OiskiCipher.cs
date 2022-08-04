@@ -39,7 +39,7 @@ namespace Oiski.School.ProjectVault.App
         /// </summary>
         /// <param name="message"></param>
         /// <returns>The encrypted message in cipher form</returns>
-        public string Encrypt(string message)
+        public byte[] Encrypt(string message)
         {
             using var cry = new RSACryptoServiceProvider(2048);
             cry.PersistKeyInCsp = false;
@@ -47,12 +47,12 @@ namespace Oiski.School.ProjectVault.App
 
             var cipherText = cry.Encrypt((_byteConverter.GetBytes(message)), true);
 
-            File.WriteAllBytes(@"C:\Users\smukk\source\repos\ProjectVault\Oiski.School.ProjectVault\Oiski.School.ProjectVault.App\bin\Debug\net6.0\Encryption.txt", cipherText);
+            //File.WriteAllBytes(@"C:\Users\smukk\source\repos\ProjectVault\Oiski.School.ProjectVault\Oiski.School.ProjectVault.App\bin\Debug\net6.0\Encryption.txt", cipherText);
 
-            cry.ImportParameters(_privateKey);
-            var plaintext = _byteConverter.GetString(cry.Decrypt(File.ReadAllBytes(@"C:\Users\smukk\source\repos\ProjectVault\Oiski.School.ProjectVault\Oiski.School.ProjectVault.App\bin\Debug\net6.0\Encryption.txt"), true));
+            //cry.ImportParameters(_privateKey);
+            //var plaintext = _byteConverter.GetString(cry.Decrypt(File.ReadAllBytes(@"C:\Users\smukk\source\repos\ProjectVault\Oiski.School.ProjectVault\Oiski.School.ProjectVault.App\bin\Debug\net6.0\Encryption.txt"), true));
 
-            return _byteConverter.GetString(cipherText);
+            return cipherText;
         }
 
         /// <summary>
@@ -60,13 +60,13 @@ namespace Oiski.School.ProjectVault.App
         /// </summary>
         /// <param name="cipherText"></param>
         /// <returns>The decrypted cipher in plaintext</returns>
-        public string Decrypt(string cipherText)
+        public string Decrypt(byte[] cipherText)
         {
             using var cry = new RSACryptoServiceProvider(2048);
             cry.PersistKeyInCsp = false;
             cry.ImportParameters(_privateKey);
 
-            var plaintext = cry.Decrypt(_byteConverter.GetBytes(cipherText), true);
+            var plaintext = cry.Decrypt(cipherText, true);
 
             return _byteConverter.GetString(plaintext);
         }
