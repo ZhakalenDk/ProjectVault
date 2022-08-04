@@ -40,7 +40,7 @@ See the [WiKi](./WikiPages/Front.md) for more in depth information about the pro
 
 ## Initial Features
 - [X] User Handling (With sign in)
-- [ ] Encryption/Decryption of files
+- [X] Encryption/Decryption of files
 - [X] Password hashing
 
 ## Change Log
