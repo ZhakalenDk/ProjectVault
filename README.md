@@ -31,6 +31,11 @@ One way to work around that is to create a user for each file encrrypted this wa
 **Note:** Originally the program was meant to be a small messanger, sending encrypted
 messages between two accounts, however, due to lack of time the idea was abandoned.
 
+### New Users
+When prompted for sign in write `new` in front of the **username** you want for the new user.
+Then type in the **password** for the user and hit `Enter`.
+If the user could be stored you can now sign in with that user.
+
 # Project Details
 | Platform       | UI          | Timeframe | Database Solution        |
 |----------------|-------------|-----------|--------------------------|
