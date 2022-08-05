@@ -44,8 +44,8 @@ if (!UserManager.SignInUser(username, password))
 }
 #endregion
 
-#region CHOICE MENU
 choice_Menu: //  Marks the beginning of the choice menu (This is a reset point)
+#region CHOICE MENU
 string choice;
 
 do
@@ -130,7 +130,7 @@ else if (choice == "d")
     {
         var crypto = new OiskiCipher(keys);
 
-        byte[] ciphertext = File.ReadAllBytes($"{filePath}/{hashedPass}_{fileName}");
+        byte[] ciphertext = File.ReadAllBytes($"{filePath}/{hashedPass}_{fileName}");   //  Reading with File
 
         var plaintext = crypto.Decrypt(ciphertext);
 

@@ -9,9 +9,20 @@ namespace Oiski.School.ProjectVault.App
 {
     public class OiskiCipher
     {
+        /// <summary>
+        /// Initialize a new instance of type <see cref="OiskiCipher"/>
+        /// <br/>
+        /// <strong>Note:</strong> Use this when no keys should be preloaded
+        /// </summary>
         public OiskiCipher() { /*Empty*/ }
+        /// <summary>
+        /// Initialize a new instance of type <see cref="OiskiCipher"/> with key paramaters preloaded
+        /// </summary>
+        /// <param name="keysAsXml"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public OiskiCipher(string keysAsXml)
         {
+            if (keysAsXml == null) { throw new ArgumentNullException(nameof(keysAsXml), "Key can't be null. If this was intended use OiskiCipher() instead"); }
             using var cry = new RSACryptoServiceProvider(2048);
             cry.PersistKeyInCsp = false;
             cry.FromXmlString(keysAsXml);
@@ -47,10 +58,12 @@ namespace Oiski.School.ProjectVault.App
 
             var cipherText = cry.Encrypt((_byteConverter.GetBytes(message)), true);
 
+            #region Test Code (Legacy)
             //File.WriteAllBytes(@"C:\Users\smukk\source\repos\ProjectVault\Oiski.School.ProjectVault\Oiski.School.ProjectVault.App\bin\Debug\net6.0\Encryption.txt", cipherText);
 
             //cry.ImportParameters(_privateKey);
             //var plaintext = _byteConverter.GetString(cry.Decrypt(File.ReadAllBytes(@"C:\Users\smukk\source\repos\ProjectVault\Oiski.School.ProjectVault\Oiski.School.ProjectVault.App\bin\Debug\net6.0\Encryption.txt"), true));
+            #endregion
 
             return cipherText;
         }
